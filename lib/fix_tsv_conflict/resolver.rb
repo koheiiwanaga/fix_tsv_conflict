@@ -34,7 +34,7 @@ module FixTSVConflict
       result = []
       left  = index_by_id(conflict.left.reject { |l| l.blank? })
       right = index_by_id(conflict.right.reject { |r| r.blank? })
-      (left.keys + right.keys).uniq.sort.each do |id|
+      (left.keys + right.keys).uniq.sort_by { |k| [k.to_i, k] }.each do |id|
         l = left[id]
         r = right[id]
         if l && r
