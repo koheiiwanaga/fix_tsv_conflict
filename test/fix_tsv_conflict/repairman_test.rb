@@ -302,4 +302,50 @@ id\tname
     TEXT
     assert_equal expected, repairman.repair(source)
   end
+
+  def test_repair_with_carry_up_right
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stderr: stderr)
+    source = <<-TEXT
+id\tname
+7\tJess
+<<<<<<< HEAD
+8\tDanny
+=======
+9\tJoey
+10\tJoseph
+>>>>>>> add_joseph
+    TEXT
+    expected = <<-TEXT
+id\tname
+7\tJess
+8\tDanny
+9\tJoey
+10\tJoseph
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_carry_up_left
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stderr: stderr)
+    source = <<-TEXT
+id\tname
+7\tJess
+<<<<<<< HEAD
+9\tJoey
+10\tJoseph
+=======
+8\tDanny
+>>>>>>> add_danny
+    TEXT
+    expected = <<-TEXT
+id\tname
+7\tJess
+8\tDanny
+9\tJoey
+10\tJoseph
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
 end
