@@ -1,10 +1,12 @@
 require "fix_tsv_conflict/conflict"
 require "fix_tsv_conflict/logging"
 require "fix_tsv_conflict/resolver"
+require "fix_tsv_conflict/refinements/tsv"
 
 module FixTSVConflict
   class Repairman
     include Logging
+    using Refinements::TSV
 
     attr_reader :stdin, :stderr
 
@@ -25,7 +27,7 @@ module FixTSVConflict
 
       source.each_line.with_index do |line, i|
         if i.zero?
-          load_tabs_count(line)
+          load_header(line)
           result << line
         elsif line.start_with?(LEFT)
           lbranch = line.chomp.split(" ").last
@@ -34,7 +36,7 @@ module FixTSVConflict
           branch = right
         elsif line.start_with?(RIGHT)
           rbranch = line.chomp.split(" ").last
-          result += handle(left, lbranch, right, rbranch)
+          result += handle(left, lbranch, right, rbranch, tsv_before(left.join, result.dup))
           branch = nil
           left.clear
           right.clear
@@ -49,12 +51,12 @@ module FixTSVConflict
       result.join
     end
 
-    def load_tabs_count(header)
-      resolver.tabs = header.count(TAB)
+    def load_header(header)
+      resolver.header = header
     end
 
-    def handle(left, lbranch, right, rbranch)
-      conflict = Conflict.new(left, lbranch, right, rbranch)
+    def handle(left, lbranch, right, rbranch, before)
+      conflict = Conflict.new(left, lbranch, right, rbranch, before)
       print_conflict(conflict)
       result = resolver.resolve(conflict)
       print_result(result)
@@ -64,7 +66,7 @@ module FixTSVConflict
     def print_conflict(conflict)
       info "Found a conflict:"
       blank
-      dump conflict.to_a
+      dump conflict.colored_to_a
       blank
     end
 
@@ -74,6 +76,14 @@ module FixTSVConflict
       dump result
       blank
       blank
+    end
+
+    def tsv_before(str, lines, before = [])
+      if str.start_within_quote?
+        before.unshift(line = lines.pop)
+        tsv_before(line + str, lines, before)
+      end
+      before
     end
   end
 end
