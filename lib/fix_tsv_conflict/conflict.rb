@@ -26,8 +26,8 @@ module FixTSVConflict
     end
 
     def tsv_same_line?
-      llines = CSV.parse((before + left).join.append_quote_if_missiong, col_sep: TAB)
-      rlines = CSV.parse((before + right).join.append_quote_if_missiong, col_sep: TAB)
+      llines = CSV.parse((before + left).join.append_quote_if_missing, col_sep: TAB)
+      rlines = CSV.parse((before + right).join.append_quote_if_missing, col_sep: TAB)
       llines.size == rlines.size && llines.size.times.all? {|i| llines[i].first.to_i == rlines[i].first.to_i }
     end
 

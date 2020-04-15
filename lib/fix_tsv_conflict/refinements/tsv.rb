@@ -14,7 +14,7 @@ module FixTSVConflict
           last_start_quote && (!last_end_quote || last_end_quote < last_start_quote)
         end
 
-        def append_quote_if_missiong
+        def append_quote_if_missing
           end_within_quote? ? self + QUOTE : self
         end
 

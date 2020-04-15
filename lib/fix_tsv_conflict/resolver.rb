@@ -49,7 +49,7 @@ module FixTSVConflict
       while lvalue || rvalue
         column = headers.shift
         if !column && (lvalue || rvalue).end_with?(LF) #end of line
-          headers = org_headers
+          headers = org_headers.dup
         end
         if lvalue != rvalue
           if selected = select_column(conflict, column, lvalue, rvalue)
