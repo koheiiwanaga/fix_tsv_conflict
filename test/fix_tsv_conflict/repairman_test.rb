@@ -1,4 +1,5 @@
 require "test_helper"
+require "pry-byebug"
 
 class RepairmanTest < Minitest::Test
   def test_repair_with_no_conflicts
@@ -345,6 +346,126 @@ id\tname
 8\tDanny
 9\tJoey
 10\tJoseph
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_multiline_right
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+<<<<<<< HEAD
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+=======
+4\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+>>>>>>> add_george
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+4\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_multiline_left
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+<<<<<<< HEAD
+4\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+=======
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+>>>>>>> add_joey
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+4\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_multiline_and_selecting_left
+    stdin = StringIO.new("1\n")
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stdin: stdin, stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+<<<<<<< HEAD
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+=======
+3\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+>>>>>>> add_george
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_multiline_and_selecting_left
+    stdin = StringIO.new("2\n")
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stdin: stdin, stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+<<<<<<< HEAD
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+=======
+3\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
+>>>>>>> add_george
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tGeorge\t"I have a pen.
+I have pineapple. Ah...
+Pineapple pen."
     TEXT
     assert_equal expected, repairman.repair(source)
   end
