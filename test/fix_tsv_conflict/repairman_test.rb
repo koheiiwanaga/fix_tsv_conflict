@@ -441,7 +441,7 @@ Apple pen."
     assert_equal expected, repairman.repair(source)
   end
 
-  def test_repair_with_multiline_and_selecting_left
+  def test_repair_with_multiline_and_selecting_right
     stdin = StringIO.new("2\n")
     stderr = StringIO.new
     repairman = FixTSVConflict::Repairman.new(stdin: stdin, stderr: stderr)
