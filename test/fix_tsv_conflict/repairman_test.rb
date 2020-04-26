@@ -363,7 +363,7 @@ I have an apple. Ah..
 Apple pen."
 =======
 4\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
 >>>>>>> add_george
     TEXT
@@ -375,7 +375,7 @@ id\tname
 I have an apple. Ah..
 Apple pen."
 4\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
     TEXT
     assert_equal expected, repairman.repair(source)
@@ -390,7 +390,7 @@ id\tname
 2\tDanny\tfuga
 <<<<<<< HEAD
 4\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
 =======
 3\tJoey\t"I have a pen.
@@ -406,7 +406,7 @@ id\tname
 I have an apple. Ah..
 Apple pen."
 4\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
     TEXT
     assert_equal expected, repairman.repair(source)
@@ -426,7 +426,7 @@ I have an apple. Ah..
 Apple pen."
 =======
 3\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
 >>>>>>> add_george
     TEXT
@@ -455,7 +455,7 @@ I have an apple. Ah..
 Apple pen."
 =======
 3\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
 Pineapple pen."
 >>>>>>> add_george
     TEXT
@@ -464,7 +464,61 @@ id\tname
 1\tJess\thoge
 2\tDanny\tfuga
 3\tGeorge\t"I have a pen.
-I have pineapple. Ah...
+I have pineapple. Ah..
+Pineapple pen."
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_multiline_inner_conflict_and_selecting_left
+    stdin = StringIO.new("1\n")
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stdin: stdin, stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+<<<<<<< have_apple
+I have an apple. Ah..
+=======
+I have pineapple. Ah..
+>>>>>>> have_pineapple
+Apple pen."
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+I have an apple. Ah..
+Apple pen."
+    TEXT
+    assert_equal expected, repairman.repair(source)
+  end
+
+  def test_repair_with_multiline_inner_conflict_and_selecting_right
+    stdin = StringIO.new("2\n")
+    stderr = StringIO.new
+    repairman = FixTSVConflict::Repairman.new(stdin: stdin, stderr: stderr)
+    source = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+<<<<<<< have_apple
+I have an apple. Ah..
+=======
+I have pineapple. Ah..
+>>>>>>> have_pineapple
+Pineapple pen."
+    TEXT
+    expected = <<-TEXT
+id\tname
+1\tJess\thoge
+2\tDanny\tfuga
+3\tJoey\t"I have a pen.
+I have pineapple. Ah..
 Pineapple pen."
     TEXT
     assert_equal expected, repairman.repair(source)
